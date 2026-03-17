@@ -13,15 +13,14 @@ def home():
 def cargar_datos():
     df = pd.read_csv(CSV_URL)
 
-    # limpiar nombres de columnas
     df.columns = df.columns.str.strip()
 
-    # convertir comas a punto (27,7 → 27.7)
+    # convertir comas a punto
     df = df.replace(",", ".", regex=True)
 
-    # convertir todo a número donde se pueda
+    # 🔥 FIX AQUÍ
     for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors="ignore")
+        df[col] = pd.to_numeric(df[col], errors="coerce")
 
     df = df.fillna(0)
     df = df.dropna(how="all")
