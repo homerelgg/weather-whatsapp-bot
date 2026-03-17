@@ -15,16 +15,17 @@ def bot():
     try:
         msg = request.values.get("Body", "").lower()
 
-       df = pd.read_csv(CSV_URL, on_bad_lines='skip')
-df = df.fillna(0)
-        df = df.dropna(how="all")  # eliminar filas vacías
+        df = pd.read_csv(CSV_URL, on_bad_lines='skip')
+        df = df.fillna(0)
+        df = df.dropna(how="all")
 
-if df.empty:
-    return "No hay datos"
+        if df.empty:
+            resp = MessagingResponse()
+            resp.message("No hay datos disponibles")
+            return str(resp)
 
-last = df.iloc[-1]
+        last = df.iloc[-1]
 
-        # usar índices (más seguro que nombres con símbolos)
         temp_aire = last[1]
         hum_aire = last[2]
         temp_hoja = last[3]
@@ -59,8 +60,7 @@ last = df.iloc[-1]
             resp.message(f"🔋 Voltaje: {voltaje} V")
 
         elif "estado" in msg:
-            resp.message(f"""
-📊 ESTADO COMPLETO
+            resp.message(f"""📊 ESTADO COMPLETO
 
 🌡 Aire: {temp_aire}°C | {hum_aire}%
 🌿 Suelo: {temp_suelo}°C | {hum_suelo}%
@@ -86,7 +86,9 @@ estado
         return str(resp)
 
     except Exception as e:
-        return str(e)
+        resp = MessagingResponse()
+        resp.message(f"Error: {str(e)}")
+        return str(resp)
 
 
 if __name__ == "__main__":
