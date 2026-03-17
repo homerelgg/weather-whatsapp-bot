@@ -8,87 +8,57 @@ CSV_URL = "https://docs.google.com/spreadsheets/d/11g-HUKPjyteAk2sYqCgkTVjIkhDFG
 
 @app.route("/")
 def home():
-    return "Bot meteorologico funcionando"
+    return "OK"
 
 @app.route("/bot", methods=["POST"])
 def bot():
+    resp = MessagingResponse()
+
     try:
         msg = request.values.get("Body", "").lower()
 
-        df = pd.read_csv(CSV_URL, on_bad_lines='skip')
-        df = df.fillna(0)
+        df = pd.read_csv(CSV_URL)
+
+        # limpieza segura
         df = df.dropna(how="all")
+        df = df.fillna(0)
 
         if df.empty:
-            resp = MessagingResponse()
-            resp.message("No hay datos disponibles")
+            resp.message("Sin datos")
             return str(resp)
 
         last = df.iloc[-1]
 
-        temp_aire = last[1]
-        hum_aire = last[2]
-        temp_hoja = last[3]
-        hum_hoja = last[4]
-        temp_suelo = last[5]
-        hum_suelo = last[6]
-        ph = last[7]
-        co2 = last[8]
-        luz = last[9]
-        temp_interna = last[10]
-        hum_interna = last[11]
-        voltaje = last[12]
+        # asegurar números
+        def safe(x):
+            try:
+                return float(x)
+            except:
+                return 0
 
-        resp = MessagingResponse()
+        temp_aire = safe(last[1])
+        hum_aire = safe(last[2])
+        temp_suelo = safe(last[5])
+        hum_suelo = safe(last[6])
+        co2 = safe(last[8])
+        ph = safe(last[7])
 
         if "clima" in msg:
-            resp.message(f"🌡 Temp aire: {temp_aire}°C\n💧 Humedad: {hum_aire}%")
+            resp.message(f"🌡 {temp_aire}°C | 💧 {hum_aire}%")
 
         elif "suelo" in msg:
-            resp.message(f"🌿 Temp suelo: {temp_suelo}°C\n💦 Hum suelo: {hum_suelo}%")
+            resp.message(f"🌿 {temp_suelo}°C | 💦 {hum_suelo}%")
 
         elif "co2" in msg:
-            resp.message(f"🌬 CO2: {co2} ppm\n🧪 pH: {ph}")
-
-        elif "luz" in msg:
-            resp.message(f"☀️ Luz: {luz} lux")
-
-        elif "interno" in msg:
-            resp.message(f"🏠 Temp interna: {temp_interna}°C\n💧 Hum interna: {hum_interna}%")
-
-        elif "voltaje" in msg:
-            resp.message(f"🔋 Voltaje: {voltaje} V")
-
-        elif "estado" in msg:
-            resp.message(f"""📊 ESTADO COMPLETO
-
-🌡 Aire: {temp_aire}°C | {hum_aire}%
-🌿 Suelo: {temp_suelo}°C | {hum_suelo}%
-🌬 CO2: {co2} ppm
-🧪 pH: {ph}
-☀️ Luz: {luz} lux
-🏠 Interno: {temp_interna}°C | {hum_interna}%
-🔋 Voltaje: {voltaje} V
-""")
+            resp.message(f"CO2: {co2} ppm | pH: {ph}")
 
         else:
-            resp.message("""📊 Comandos disponibles:
-
-clima
-suelo
-co2
-luz
-interno
-voltaje
-estado
-""")
-
-        return str(resp)
+            resp.message("ok")
 
     except Exception as e:
-        resp = MessagingResponse()
-        resp.message(f"Error: {str(e)}")
-        return str(resp)
+        resp.message(f"ERROR: {str(e)}")
+
+    return str(resp)
 
 
 if __name__ == "__main__":
