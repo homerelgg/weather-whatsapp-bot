@@ -19,7 +19,10 @@ def bot():
 df = df.fillna(0)
         df = df.dropna(how="all")  # eliminar filas vacías
 
-        last = df.iloc[-1]
+if df.empty:
+    return "No hay datos"
+
+last = df.iloc[-1]
 
         # usar índices (más seguro que nombres con símbolos)
         temp_aire = last[1]
