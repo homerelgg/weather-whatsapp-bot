@@ -15,7 +15,8 @@ def bot():
     try:
         msg = request.values.get("Body", "").lower()
 
-        df = pd.read_csv(CSV_URL)
+       df = pd.read_csv(CSV_URL, on_bad_lines='skip')
+df = df.fillna(0)
         df = df.dropna(how="all")  # eliminar filas vacías
 
         last = df.iloc[-1]
