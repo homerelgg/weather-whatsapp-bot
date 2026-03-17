@@ -1,4 +1,4 @@
-flask
-twilio
+Flask
 pandas
+twilio
 gunicorn
